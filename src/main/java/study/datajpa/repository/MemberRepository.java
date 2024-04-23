@@ -17,4 +17,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 //    @Query(name = "Member.findByUsername") //생략해도된다. named쿼리를 먼저 찾고 없으면 메서드 이름으로 쿼리를 생성한다.
     List<Member> findByUsername(@Param("username") String username);
+
+    @Query("select m from Member m where m.username = :username and m.age = :age")
+    List<Member> findUser(@Param("username") String username, @Param("age") int age);
 }
