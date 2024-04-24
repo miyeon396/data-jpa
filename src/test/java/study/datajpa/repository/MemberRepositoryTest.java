@@ -272,5 +272,71 @@ class MemberRepositoryTest {
         assertThat(resultCount).isEqualTo(3);
     }
 
+    @Test
+    public void findMemberLazy() {
+
+        //given
+        //member1 -> teamA 참조
+        //member2 -> teamB 참조
+        //멤버와 팀은 다대일 레이지로 되어있음. 멤버를 조회할 때 팀을 조회 하지 않음. 가짜 객체로 만들어놓고 실제로 팀을 쓸 때 조회함 (=지연로딩)
+
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        //영속성 컨텍스트 초기화
+        entityManager.flush();
+        entityManager.clear();
+
+        // N + 1 -> 쿼리를 한번 날렸는데 결과가 2개가 나옴 그럼 2번 쿼리를 더 돌리는 것
+        //select Member 얘가 1
+        List<Member> members = memberRepository.findAll();
+
+        //보통 JPA에선 패치 조인으로 해결 .
+        for(Member member : members) {
+            System.out.println("member = " + member.getUsername());
+            System.out.println("member.getTeam().getClass() = " + member.getTeam().getClass());
+            System.out.println("member.getTeam().getName() = " + member.getTeam().getName()); //select Team
+        }
+    }
+
+    @Test
+    public void findMemberLazy_fetchJoin() {
+
+        //given
+        //member1 -> teamA 참조
+        //member2 -> teamB 참조
+        //멤버와 팀은 다대일 레이지로 되어있음. 멤버를 조회할 때 팀을 조회 하지 않음. 가짜 객체로 만들어놓고 실제로 팀을 쓸 때 조회함 (=지연로딩)
+
+        Team teamA = new Team("teamA");
+        Team teamB = new Team("teamB");
+        teamRepository.save(teamA);
+        teamRepository.save(teamB);
+        Member member1 = new Member("member1", 10, teamA);
+        Member member2 = new Member("member2", 20, teamB);
+        memberRepository.save(member1);
+        memberRepository.save(member2);
+
+        //영속성 컨텍스트 초기화
+        entityManager.flush();
+        entityManager.clear();
+
+        //    @Query("select m from Member m left join fetch m.team")//페치 조인이란걸 하면 멤버를 조회할 떄 연관된 팀을 한번에 같이 가져옵니다.
+        //    List<Member> findMemberFetchJoin();
+        List<Member> members = memberRepository.findMemberFetchJoin(); //연관관계 있는걸 데이터 베이스 조인을 이용하여 한방에 가져온다.
+
+        //보통 JPA에선 패치 조인으로 해결 .
+        for(Member member : members) {
+            System.out.println("member = " + member.getUsername());
+            System.out.println("member.getTeam().getClass() = " + member.getTeam().getClass()); //패치조인하니 순수한 팀 엔티티 객체 끌고오네
+            System.out.println("member.getTeam().getName() = " + member.getTeam().getName()); //select Team
+        }
+    }
+
 
 }

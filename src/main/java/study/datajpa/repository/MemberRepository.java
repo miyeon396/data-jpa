@@ -53,4 +53,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Modifying(clearAutomatically = true)
     @Query("update Member m set m.age = m.age + 1 where m.age >= :age ")
     int bulkAgePlus(@Param("age") int age);
+
+
+    @Query("select m from Member m left join fetch m.team")//페치 조인이란걸 하면 멤버를 조회할 떄 연관된 팀을 한번에 같이 가져옵니다.
+    List<Member> findMemberFetchJoin();
 }
