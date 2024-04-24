@@ -3,6 +3,7 @@ package study.datajpa.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -57,4 +58,15 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     @Query("select m from Member m left join fetch m.team")//페치 조인이란걸 하면 멤버를 조회할 떄 연관된 팀을 한번에 같이 가져옵니다.
     List<Member> findMemberFetchJoin();
+
+    @Override
+    @EntityGraph(attributePaths = {"team"})
+    List<Member> findAll();
+
+    @EntityGraph(attributePaths = {"team"})
+    @Query("select m from Member m") //이런식으로 JPQL에다가 붙여도됨.
+    List<Member> findMemberEntityGraph();
+
+    @EntityGraph(attributePaths = {"team"})
+    List<Member> findEntityGraphByUsername(@Param("username") String username); //네이밍 메서드에서도 쓰고싶어
 }
