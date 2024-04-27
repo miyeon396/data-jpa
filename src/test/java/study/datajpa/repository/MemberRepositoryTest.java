@@ -399,4 +399,29 @@ class MemberRepositoryTest {
     }
 
 
+    @Test
+    public void queryHintNotUse() {
+        Member member1 = memberRepository.save(new Member("member1", 10));
+        entityManager.flush();
+        entityManager.clear();
+
+        Member findMember = memberRepository.findById(member1.getId()).get();
+        findMember.setUsername("member2");
+
+        entityManager.flush(); //단점 변경감지를 하려면 데이터를 2개를 갖고있어야햄
+    }
+
+    @Test
+    public void queryHintUse() {
+        Member member1 = memberRepository.save(new Member("member1", 10));
+        entityManager.flush();
+        entityManager.clear();
+
+        Member findMember = memberRepository.findReadOnlyByUsername("member1");//변경감지 안하고 readonly만 함
+        findMember.setUsername("member2");
+
+        entityManager.flush();
+    }
+
+
 }
