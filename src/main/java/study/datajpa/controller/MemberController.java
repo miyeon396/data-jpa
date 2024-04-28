@@ -38,7 +38,7 @@ public class MemberController {
         return map;
     }
 
-    @PostConstruct //스프링 올라 올 때 한번 실행이 되는 것
+//    @PostConstruct //스프링 올라 올 때 한번 실행이 되는 것
     public void init() {
         for (int i=0; i< 100; i++) {
             memberRepository.save(new Member("user"+i, i));
